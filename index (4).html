@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copilot access cost comparison</title>
+<meta name="description" content="Compare the monthly cost of Copilot Business or Copilot Enterprise with the Copilot access billing model for GitHub Enterprise.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ground: #EEF1F5;
+  --surface: #FFFFFF;
+  --ink: #17212E;
+  --ink-2: #4A5768;
+  --rule: #D3DAE3;
+  --rule-strong: #9AA6B5;
+  --plan: #5746C7;
+  --access: #0A7F63;
+  --access-wash: rgba(10, 127, 99, 0.13);
+  --more: #A65A00;
+  --gutter: clamp(18px, 4vw, 40px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #141B25;
+    --surface: #1B2430;
+    --ink: #E9EEF4;
+    --ink-2: #A5B1C1;
+    --rule: #2F3B4B;
+    --rule-strong: #5C6B7E;
+    --plan: #A99DFF;
+    --access: #52D3B0;
+    --access-wash: rgba(82, 211, 176, 0.16);
+    --more: #F1B45C;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: Archivo, "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+a { color: inherit; text-underline-offset: 2px; }
+a:hover { color: var(--plan); }
+:focus-visible { outline: 2px solid var(--plan); outline-offset: 2px; border-radius: 3px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+.num { font-variant-numeric: tabular-nums; }
+.quiet { color: var(--ink-2); }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Masthead */
+.masthead { padding: clamp(28px, 5vw, 56px) var(--gutter) clamp(22px, 3vw, 34px); }
+.masthead h1 {
+  margin: 0 0 14px;
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  font-weight: 680;
+  font-stretch: 122%;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  max-width: 18ch;
+}
+.masthead p { margin: 0; max-width: 68ch; color: var(--ink-2); font-size: 1.0625rem; }
+
+/* Two-tone layout: inputs on the tinted band, answer on the surface */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 384px) minmax(0, 1fr);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.inputs { background: var(--ground); padding: 28px var(--gutter) 32px; }
+.inputs-inner { position: sticky; top: 16px; }
+.results { padding: 28px var(--gutter) 40px; min-width: 0; }
+@media (max-width: 880px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .inputs-inner { position: static; }
+}
+
+/* Form */
+fieldset { border: 0; margin: 0 0 26px; padding: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 10px; font-weight: 680; font-stretch: 112%; font-size: 1.0625rem; }
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label, .field .label { font-weight: 560; font-size: 0.9375rem; }
+.hint { font-size: 0.875rem; color: var(--ink-2); margin: 0; }
+.hint.flag { color: var(--more); }
+input[type="number"] {
+  width: 100%;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  padding: 9px 12px;
+}
+input[type="range"] { width: 100%; accent-color: var(--ink); margin: 2px 0; }
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--rule-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 3px;
+  gap: 3px;
+}
+.segmented label { position: relative; cursor: pointer; }
+.segmented input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.segmented span {
+  display: block;
+  text-align: center;
+  padding: 8px 6px;
+  border-radius: 5px;
+  font-weight: 560;
+  font-size: 0.9375rem;
+  line-height: 1.25;
+}
+.segmented input:checked + span { background: var(--ink); color: var(--surface); }
+.segmented input:focus-visible + span { outline: 2px solid var(--plan); outline-offset: 2px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.chips button, .actions button, .reset {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 560;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.chips button:hover, .actions button:hover, .reset:hover { border-color: var(--ink); }
+
+details.rates { border-top: 1px solid var(--rule); padding-top: 14px; }
+details.rates summary { cursor: pointer; font-weight: 680; font-stretch: 112%; font-size: 1.0625rem; }
+details.rates .hint { margin: 10px 0 14px; }
+.rate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+
+/* Answer */
+.verdict {
+  margin: 0 0 10px;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 640;
+  font-stretch: 110%;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  max-width: 30ch;
+}
+.verdict .less { color: var(--access); }
+.verdict .more { color: var(--more); }
+.breakeven { margin: 0 0 24px; max-width: 70ch; color: var(--ink-2); }
+
+.totals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 0 0 26px; }
+.total { border-left: 4px solid var(--plan); padding-left: 14px; }
+.total.is-access { border-left-color: var(--access); }
+.total .name { font-weight: 560; }
+.total .amount {
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  font-weight: 680;
+  font-stretch: 112%;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.total .per { font-size: 0.875rem; color: var(--ink-2); }
+@media (max-width: 460px) { .totals { grid-template-columns: minmax(0, 1fr); } }
+
+figure.chart { margin: 0 0 28px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 0.875rem; margin-bottom: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend svg { flex: none; }
+.legend .wash { width: 18px; height: 12px; background: var(--access-wash); border: 1px solid var(--access); border-radius: 2px; }
+#chart { display: block; width: 100%; height: 380px; touch-action: pan-y; cursor: ew-resize; user-select: none; }
+#chart text { font-family: inherit; font-size: 12px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+#chart .grid { stroke: var(--rule); stroke-width: 1; }
+#chart .axis { stroke: var(--rule-strong); stroke-width: 1; }
+#chart .line-plan { fill: none; stroke: var(--plan); stroke-width: 2.5; stroke-linejoin: round; }
+#chart .line-access { fill: none; stroke: var(--access); stroke-width: 2.5; stroke-dasharray: 7 5; }
+#chart .wash { fill: var(--access-wash); }
+#chart .marker { stroke: var(--ink); stroke-width: 1.5; }
+#chart .tag { fill: var(--ink); font-weight: 600; }
+#chart .dot-plan { fill: var(--plan); stroke: var(--surface); stroke-width: 2; }
+#chart .dot-access { fill: var(--access); stroke: var(--surface); stroke-width: 2; }
+#chart .be { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+#chart .note { fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+figcaption { font-size: 0.875rem; color: var(--ink-2); margin-top: 6px; max-width: 70ch; }
+
+table.breakdown { width: 100%; border-collapse: collapse; margin: 0 0 14px; }
+.breakdown caption { text-align: left; font-weight: 680; font-stretch: 112%; font-size: 1.0625rem; padding-bottom: 8px; }
+.breakdown th, .breakdown td { text-align: left; vertical-align: top; padding: 10px 12px 10px 0; border-top: 1px solid var(--rule); }
+.breakdown thead th { border-top: 0; font-weight: 560; font-size: 0.9375rem; padding-top: 0; }
+.breakdown tbody th { font-weight: 560; width: 28%; }
+.breakdown td { font-variant-numeric: tabular-nums; }
+.breakdown td small { display: block; color: var(--ink-2); font-size: 0.8125rem; }
+.breakdown tr.sum th, .breakdown tr.sum td { border-top: 2px solid var(--ink); font-weight: 680; }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; background: var(--plan); }
+.key.is-access { background: var(--access); }
+.pool { margin: 0 0 22px; max-width: 70ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.actions .status { font-size: 0.875rem; color: var(--ink-2); }
+
+/* Notes */
+.notes { padding: 36px var(--gutter) 28px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.notes h2 { margin: 0 0 10px; font-size: 1.125rem; font-weight: 680; font-stretch: 112%; }
+.notes ul, .notes ol { margin: 0; padding-left: 1.15em; }
+.notes li { margin-bottom: 8px; }
+.notes p { margin: 0 0 10px; }
+.notes .provenance { font-size: 0.875rem; color: var(--ink-2); }
+.notes code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.875em; overflow-wrap: anywhere; }
+@media (max-width: 980px) { .notes { grid-template-columns: minmax(0, 1fr); gap: 26px; } }
+
+footer { padding: 18px var(--gutter) 40px; font-size: 0.875rem; color: var(--ink-2); border-top: 1px solid var(--rule); }
+footer p { margin: 0 0 6px; max-width: 90ch; }
+</style>
+</head>
+<body>
+
+<header class="masthead wrap">
+  <h1>Would Copilot access cost you less?</h1>
+  <p>Eligible GitHub Enterprise customers can now drop the per-seat Copilot charge and pay only for the AI credits their developers use. Enter your seats and usage to see how that compares with Copilot Business or Copilot Enterprise.</p>
+</header>
+
+<div class="wrap">
+<main class="layout">
+
+  <form class="inputs" id="inputs" autocomplete="off" onsubmit="return false">
+    <div class="inputs-inner">
+
+      <fieldset>
+        <legend>Your plan today</legend>
+        <div class="segmented">
+          <label><input type="radio" name="plan" value="cb" checked><span>Copilot Business</span></label>
+          <label><input type="radio" name="plan" value="ce"><span>Copilot Enterprise</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Who has Copilot</legend>
+        <div class="field">
+          <label for="seats">Copilot seats</label>
+          <input class="num" type="number" id="seats" min="0" step="1" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="ghec">Of those, users with a GitHub Enterprise Cloud licence</label>
+          <input class="num" type="number" id="ghec" min="0" step="1" inputmode="numeric" aria-describedby="ghecHint">
+          <p class="hint" id="ghecHint"></p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>How much they use</legend>
+        <div class="field">
+          <span class="label" id="modeLabel">Enter usage as</span>
+          <div class="segmented" role="group" aria-labelledby="modeLabel">
+            <label><input type="radio" name="mode" value="a" checked><span>Average per user</span></label>
+            <label><input type="radio" name="mode" value="t"><span>Enterprise total</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="usage" id="usageLabel">AI credits per user a month</label>
+          <input class="num" type="number" id="usage" min="0" step="10" inputmode="numeric" aria-describedby="usageHint">
+          <label class="visually-hidden" for="slider">Average AI credits per user a month</label>
+          <input type="range" id="slider" min="0" step="10">
+          <p class="hint num" id="usageHint"></p>
+        </div>
+        <div class="field">
+          <span class="label">Or set usage against today's allowance</span>
+          <div class="chips">
+            <button type="button" data-frac="0.5">Half</button>
+            <button type="button" data-frac="1">All of it</button>
+            <button type="button" data-frac="1.5">1.5 times</button>
+            <button type="button" data-frac="2">Double</button>
+          </div>
+        </div>
+        <p class="hint">Use total consumption from your AI usage dashboard or usage export, including usage your pooled allowance covers today. Code completions and next edit suggestions don't use credits.</p>
+      </fieldset>
+
+      <details class="rates">
+        <summary>Rates</summary>
+        <p class="hint">GitHub list prices in US dollars, checked 5 November 2026. Change them to model the pricing on your own agreement.</p>
+        <div class="rate-grid">
+          <div class="field"><label for="bp">Business seat, $ a month</label><input class="num" type="number" id="bp" min="0" step="0.01"></div>
+          <div class="field"><label for="ba">Business credits per user</label><input class="num" type="number" id="ba" min="0" step="1"></div>
+          <div class="field"><label for="ep">Enterprise seat, $ a month</label><input class="num" type="number" id="ep" min="0" step="0.01"></div>
+          <div class="field"><label for="ea">Enterprise credits per user</label><input class="num" type="number" id="ea" min="0" step="1"></div>
+          <div class="field"><label for="sf">Copilot Standalone, $ a month</label><input class="num" type="number" id="sf" min="0" step="0.01"></div>
+          <div class="field"><label for="cv">One AI credit, $</label><input class="num" type="number" id="cv" min="0" step="0.001"></div>
+        </div>
+        <button type="button" class="reset" id="reset">Reset to list prices</button>
+      </details>
+
+    </div>
+  </form>
+
+  <section class="results" aria-label="Comparison">
+    <h2 class="verdict" id="verdict" aria-live="polite"></h2>
+    <p class="breakeven" id="breakeven"></p>
+
+    <div class="totals">
+      <div class="total">
+        <div class="name" id="nowName"></div>
+        <div class="amount" id="nowAmount"></div>
+        <div class="per">a month</div>
+      </div>
+      <div class="total is-access">
+        <div class="name">Copilot access</div>
+        <div class="amount" id="accAmount"></div>
+        <div class="per">a month</div>
+      </div>
+    </div>
+
+    <figure class="chart">
+      <div class="legend" aria-hidden="true">
+        <span><svg width="26" height="8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--plan)" stroke-width="2.5"/></svg><span id="legendPlan"></span></span>
+        <span><svg width="26" height="8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--access)" stroke-width="2.5" stroke-dasharray="7 5"/></svg>Copilot access</span>
+        <span><i class="wash"></i>Copilot access is cheaper</span>
+      </div>
+      <svg id="chart" role="img" aria-labelledby="chartDesc"></svg>
+      <figcaption id="chartDesc"></figcaption>
+    </figure>
+
+    <table class="breakdown">
+      <caption>Where the money goes each month</caption>
+      <thead>
+        <tr>
+          <th scope="col"><span class="visually-hidden">Line</span></th>
+          <th scope="col"><i class="key"></i><span id="thPlan"></span></th>
+          <th scope="col"><i class="key is-access"></i>Copilot access</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <p class="pool" id="pool"></p>
+
+    <div class="actions">
+      <button type="button" id="copySummary">Copy summary</button>
+      <button type="button" id="copyLink">Copy link to this estimate</button>
+      <span class="status" id="copyStatus" role="status"></span>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<section class="notes wrap" aria-label="Notes">
+  <div>
+    <h2>What GitHub has published</h2>
+    <ul>
+      <li>Copilot Business costs $19 per seat a month and includes 1,900 pooled AI credits per user. Copilot Enterprise costs $39 and includes 3,900.<sup><a href="#s2">2</a></sup></li>
+      <li>Copilot access has no seat charge for users with a GitHub Enterprise Cloud licence. Everyone else is on Copilot Standalone at $10 per user a month. Neither includes credits, so usage is billed from the first use.<sup><a href="#s1">1</a></sup></li>
+      <li>One AI credit is $0.01, and usage beyond a pooled allowance is billed at that rate.<sup><a href="#s3">3</a></sup></li>
+      <li>The billing model applies to the whole enterprise. Copilot access can't be mixed with Copilot Business or Copilot Enterprise seats.<sup><a href="#s1">1</a></sup></li>
+      <li>Copilot access has the same feature and model eligibility as Copilot Enterprise.<sup><a href="#s1">1</a></sup></li>
+      <li>Moving is voluntary. It is arranged through a GitHub or Microsoft account team, has been available that way since 28 October 2026, and takes effect on the first day of a month. It isn't yet open to customers who manage their own subscription.<sup><a href="#s1">1</a></sup></li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>What this estimate assumes</h2>
+    <p class="provenance">These are our assumptions, not statements from GitHub.</p>
+    <ul>
+      <li>Usage stays the same after you move. Copilot Business customers gain Copilot Enterprise model eligibility, which may push usage up.</li>
+      <li>Prices are list prices in US dollars, before tax, with no negotiated discount unless you change the rates.</li>
+      <li>GitHub Enterprise Cloud licence costs are left out, because they are the same on both sides.</li>
+      <li>Copilot code review also uses GitHub Actions minutes.<sup><a href="#s3">3</a></sup> Those aren't included.</li>
+      <li>Every seat is counted for a full month.</li>
+    </ul>
+  </div>
+
+  <div>
+    <h2>Before you move</h2>
+    <p class="provenance">Steps GitHub lists for a voluntary transition.<sup><a href="#s1">1</a></sup></p>
+    <ol>
+      <li>Set budgets, using this estimate as the baseline and allowing for growth in users or usage.</li>
+      <li>Keep the "AI credits paid usage" policy enabled in your enterprise's AI Controls. Features that consume credits stop working without it.</li>
+      <li>If your firewall only allows <code>*.business.githubcopilot.com</code>, add <code>*.enterprise.githubcopilot.com</code>.</li>
+      <li>Assign Copilot seats. Users don't get Copilot automatically, even with a GitHub Enterprise Cloud licence.</li>
+    </ol>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p id="s1">1. GitHub Docs, <a href="https://docs.github.com/en/copilot/get-started/whats-changing-with-github-enterprise-and-copilot">What's changing with GitHub Enterprise and Copilot billing</a></p>
+  <p id="s2">2. GitHub Docs, <a href="https://docs.github.com/en/copilot/get-started/plans">Plans for GitHub Copilot</a></p>
+  <p id="s3">3. GitHub Docs, <a href="https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing">Models and pricing for GitHub Copilot</a></p>
+  <p>This is an independent estimate, not a GitHub or Microsoft tool and not a quote. Confirm pricing and migration terms for your account with your GitHub or Microsoft account team.</p>
+</footer>
+
+<noscript><p style="padding:20px">This calculator needs JavaScript to run.</p></noscript>
+
+<script>
+(function () {
+  'use strict';
+
+  // List prices from GitHub Docs, checked 5 November 2026. See the footnotes on the page.
+  var LIST = { bp: 19, ba: 1900, ep: 39, ea: 3900, sf: 10, cv: 0.01 };
+  var DEFAULTS = { p: 'cb', n: 250, g: 200, m: 'a', u: 1200 };
+  var RATE_KEYS = ['bp', 'ba', 'ep', 'ea', 'sf', 'cv'];
+  var EPS = 0.005;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var form = $('inputs');
+  var els = {
+    seats: $('seats'), ghec: $('ghec'), usage: $('usage'), slider: $('slider'),
+    bp: $('bp'), ba: $('ba'), ep: $('ep'), ea: $('ea'), sf: $('sf'), cv: $('cv'),
+    chart: $('chart')
+  };
+
+  var state = Object.assign({}, DEFAULTS, LIST);
+  var dragXmax = null;
+  var chartXmax = 0;
+
+  /* ---------- formatting ---------- */
+  var fmt0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  var fmt2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var fmtAxis = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 });
+  var fmtN = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+  function money(v) {
+    var r = Math.round(v * 100) / 100;
+    return Number.isInteger(r) ? fmt0.format(r) : fmt2.format(r);
+  }
+  function count(v) { return fmtN.format(Math.round(v)); }
+  function plural(n, one, many) { return n === 1 ? one : many; }
+
+  /* ---------- the model ---------- */
+  function model(s) {
+    var isCB = s.p === 'cb';
+    var m = {};
+    m.planName = isCB ? 'Copilot Business' : 'Copilot Enterprise';
+    m.price = isCB ? s.bp : s.ep;
+    m.allow = isCB ? s.ba : s.ea;
+    m.n = Math.max(0, Math.floor(s.n));
+    m.g = Math.min(m.n, Math.max(0, Math.floor(s.g)));
+    m.st = m.n - m.g;
+    m.total = s.m === 'a' ? s.u * m.n : s.u;
+    m.avg = m.n > 0 ? m.total / m.n : 0;
+    m.pool = m.n * m.allow;
+
+    m.seatNow = m.n * m.price;
+    m.over = Math.max(0, m.total - m.pool);
+    m.meterNow = m.over * s.cv;
+    m.now = m.seatNow + m.meterNow;
+
+    m.seatAcc = m.st * s.sf;
+    m.meterAcc = m.total * s.cv;
+    m.acc = m.seatAcc + m.meterAcc;
+
+    m.diff = m.acc - m.now;
+
+    // Gap (access minus today) with no usage, and once usage is past the pooled allowance.
+    var d0 = m.seatAcc - m.seatNow;
+    m.dInf = d0 + m.pool * s.cv;
+    m.beTotal = null;
+    if (d0 >= -EPS) m.kind = 'never';
+    else if (m.dInf > EPS) { m.kind = 'cross'; m.beTotal = -d0 / s.cv; }
+    else if (m.dInf >= -EPS) m.kind = 'equalAbove';
+    else m.kind = 'always';
+    m.beAvg = m.beTotal !== null && m.n > 0 ? m.beTotal / m.n : null;
+    return m;
+  }
+
+  /* ---------- state in and out ---------- */
+  function numVal(el) {
+    var v = parseFloat(el.value);
+    return Number.isFinite(v) && v >= 0 ? v : 0;
+  }
+
+  function readHash() {
+    var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    if (h.get('p') === 'cb' || h.get('p') === 'ce') state.p = h.get('p');
+    if (h.get('m') === 'a' || h.get('m') === 't') state.m = h.get('m');
+    ['n', 'g', 'u'].concat(RATE_KEYS).forEach(function (k) {
+      if (!h.has(k)) return;
+      var v = parseFloat(h.get(k));
+      if (Number.isFinite(v) && v >= 0) state[k] = v;
+    });
+  }
+
+  function hashString() {
+    var h = new URLSearchParams();
+    h.set('p', state.p); h.set('n', state.n); h.set('g', state.g);
+    h.set('m', state.m); h.set('u', state.u);
+    RATE_KEYS.forEach(function (k) { if (state[k] !== LIST[k]) h.set(k, state[k]); });
+    return h.toString();
+  }
+
+  function writeControls(skip) {
+    function put(el, v) { if (el !== skip) el.value = v; }
+    form.elements.plan.value = state.p;
+    form.elements.mode.value = state.m;
+    put(els.seats, state.n);
+    put(els.ghec, state.g);
+    put(els.usage, state.u);
+    RATE_KEYS.forEach(function (k) { put(els[k], state[k]); });
+    var allow = state.p === 'cb' ? state.ba : state.ea;
+    var n = Math.floor(state.n);
+    var avg = state.m === 'a' ? state.u : (n > 0 ? state.u / n : 0);
+    els.slider.max = Math.max(100, Math.round(allow * 4));
+    put(els.slider, Math.round(avg));
+  }
+
+  function readControls(target) {
+    state.p = form.elements.plan.value;
+    state.n = numVal(els.seats);
+    state.g = numVal(els.ghec);
+    RATE_KEYS.forEach(function (k) { state[k] = numVal(els[k]); });
+    var n = Math.floor(state.n);
+    var mode = form.elements.mode.value;
+    if (mode !== state.m) {
+      state.u = Math.round(mode === 't' ? state.u * n : (n > 0 ? state.u / n : 0));
+      state.m = mode;
+    } else if (target === els.slider) {
+      state.u = state.m === 'a' ? numVal(els.slider) : numVal(els.slider) * n;
+    } else {
+      state.u = numVal(els.usage);
+    }
+  }
+
+  function setAverage(avg) {
+    var n = Math.floor(state.n);
+    state.u = state.m === 'a' ? Math.round(avg) : Math.round(avg * n);
+  }
+
+  /* ---------- rendering ---------- */
+  function render(skip) {
+    var m = model(state);
+    writeControls(skip);
+
+    $('usageLabel').textContent = state.m === 'a'
+      ? 'AI credits per user a month'
+      : 'AI credits a month, whole enterprise';
+    $('usageHint').textContent = state.m === 'a'
+      ? money(m.avg * state.cv) + ' per user, ' + count(m.total) + ' credits in total'
+      : count(m.avg) + ' credits per user, ' + money(m.avg * state.cv) + ' each';
+
+    var ghecHint = $('ghecHint');
+    ghecHint.classList.toggle('flag', state.g > m.n);
+    if (state.g > m.n) {
+      ghecHint.textContent = 'That is more than your Copilot seats, so all ' + count(m.n) + ' are counted as licensed.';
+    } else if (m.st > 0) {
+      ghecHint.textContent = count(m.st) + ' ' + plural(m.st, 'user', 'users') + ' without that licence would move to Copilot Standalone at ' + money(state.sf) + ' each a month.';
+    } else {
+      ghecHint.textContent = 'Every Copilot user has the licence, so Copilot access carries no seat charge.';
+    }
+
+    $('nowName').textContent = m.planName + ', today';
+    $('legendPlan').textContent = m.planName;
+    $('thPlan').textContent = m.planName + ', today';
+    $('nowAmount').textContent = money(m.now);
+    $('accAmount').textContent = money(m.acc);
+
+    var verdict = $('verdict');
+    var be = $('breakeven');
+    if (m.n === 0) {
+      verdict.textContent = 'Enter your Copilot seats to see the comparison.';
+      be.textContent = '';
+    } else {
+      if (Math.abs(m.diff) < EPS) {
+        verdict.textContent = 'At this usage, Copilot access costs the same as ' + m.planName + '.';
+      } else {
+        var cls = m.diff < 0 ? 'less' : 'more';
+        verdict.innerHTML = 'At this usage, Copilot access costs <span class="' + cls + '">' +
+          money(Math.abs(m.diff)) + ' ' + cls + '</span> a month than ' + m.planName + '.';
+      }
+      var year = Math.abs(m.diff) >= EPS ? ' Over a year the difference is ' + money(Math.abs(m.diff) * 12) + '.' : '';
+      if (m.kind === 'cross') {
+        be.textContent = 'The two cost the same at ' + count(m.beAvg) + ' credits per user a month (' + money(m.beAvg * state.cv) +
+          '). Below that, Copilot access is cheaper. Above it, Copilot access costs more, by up to ' + money(m.dInf) + ' a month.' + year;
+      } else if (m.kind === 'equalAbove') {
+        be.textContent = 'Copilot access is cheaper until usage reaches the pooled allowance of ' + count(m.allow) +
+          ' credits per user, and costs the same beyond it.' + year;
+      } else if (m.kind === 'always') {
+        be.textContent = 'At these rates Copilot access is cheaper at every level of usage.' + year;
+      } else {
+        be.textContent = 'At these rates Copilot access is not cheaper at any level of usage.' + year;
+      }
+    }
+
+    renderRows(m);
+    renderPool(m);
+    renderChart(m);
+
+    try { history.replaceState(null, '', '#' + hashString()); } catch (e) { /* file:// or sandboxed */ }
+  }
+
+  function renderRows(m) {
+    var cv = state.cv;
+    var seatAccNote = count(m.st) + ' on Copilot Standalone × ' + money(state.sf) +
+      (m.g > 0 ? ', ' + count(m.g) + ' licensed × $0' : '');
+    var rows = [
+      ['Seat charges',
+        money(m.seatNow) + '<small>' + count(m.n) + ' ' + plural(m.n, 'seat', 'seats') + ' × ' + money(m.price) + '</small>',
+        money(m.seatAcc) + '<small>' + seatAccNote + '</small>'],
+      ['Included AI credits',
+        count(m.pool) + '<small>' + count(m.allow) + ' per user, pooled</small>',
+        'None'],
+      ['Usage billed',
+        money(m.meterNow) + '<small>' + count(m.over) + ' credits over the allowance × ' + money(cv) + '</small>',
+        money(m.meterAcc) + '<small>All ' + count(m.total) + ' credits × ' + money(cv) + '</small>']
+    ];
+    var html = rows.map(function (r) {
+      return '<tr><th scope="row">' + r[0] + '</th><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>';
+    }).join('');
+    html += '<tr class="sum"><th scope="row">Total a month</th><td>' + money(m.now) + '</td><td>' + money(m.acc) + '</td></tr>';
+    html += '<tr><th scope="row">Total a year</th><td>' + money(m.now * 12) + '</td><td>' + money(m.acc * 12) + '</td></tr>';
+    $('rows').innerHTML = html;
+  }
+
+  function renderPool(m) {
+    var p = $('pool');
+    if (m.n === 0 || m.pool === 0) { p.textContent = ''; return; }
+    if (m.total <= m.pool) {
+      var unused = m.pool - m.total;
+      p.textContent = 'Today you use ' + Math.round(m.total / m.pool * 100) + '% of your pooled allowance. ' +
+        (unused > 0 ? count(unused) + ' credits a month, worth ' + money(unused * state.cv) + ', are paid for and not used.' : '');
+    } else {
+      p.textContent = 'Today you use ' + Math.round(m.total / m.pool * 100) + '% of your pooled allowance and pay for ' +
+        count(m.over) + ' extra credits a month.';
+    }
+  }
+
+  function niceStep(x) {
+    if (!(x > 0)) return 1;
+    var p = Math.pow(10, Math.floor(Math.log10(x)));
+    var f = x / p;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+  }
+  function niceCeil(v, parts) {
+    var step = niceStep(v / parts);
+    return Math.ceil(v / step - 1e-9) * step;
+  }
+
+  function renderChart(m) {
+    var svg = els.chart;
+    var W = Math.max(280, Math.round(svg.clientWidth || 720));
+    var H = W < 520 ? 300 : 380;
+    var ML = 50, MR = 14, MT = 34, MB = 44;
+    var pw = W - ML - MR, ph = H - MT - MB;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.style.height = H + 'px';
+
+    var n = Math.max(1, m.n);
+    var cv = state.cv;
+    var xmax = dragXmax !== null ? dragXmax : niceCeil(Math.max(m.allow * 2, m.avg * 1.25, 100), 4);
+    chartXmax = xmax;
+    var nowAt = function (u) { return m.seatNow + Math.max(0, u * n - m.pool) * cv; };
+    var accAt = function (u) { return m.seatAcc + u * n * cv; };
+    var ymax = niceCeil(Math.max(nowAt(xmax), accAt(xmax), 1) * 1.02, 4);
+    var X = function (u) { return ML + (u / xmax) * pw; };
+    var Y = function (c) { return MT + ph - (c / ymax) * ph; };
+    var pt = function (u, c) { return X(u).toFixed(1) + ',' + Y(c).toFixed(1); };
+    var out = [];
+    var notes = [];
+
+    // Gridlines and y labels
+    var ystep = niceStep(ymax / 4);
+    for (var c = 0; c <= ymax + 1e-9; c += ystep) {
+      out.push('<line class="' + (c === 0 ? 'axis' : 'grid') + '" x1="' + ML + '" x2="' + (W - MR) + '" y1="' + Y(c).toFixed(1) + '" y2="' + Y(c).toFixed(1) + '"/>');
+      out.push('<text x="' + (ML - 8) + '" y="' + (Y(c) + 4).toFixed(1) + '" text-anchor="end">' + fmtAxis.format(c) + '</text>');
+    }
+    // X labels
+    var xstep = niceStep(xmax / Math.max(2, Math.floor(pw / 90)));
+    for (var u = 0; u <= xmax + 1e-9; u += xstep) {
+      var anchor = u === 0 ? 'start' : (X(u) > W - MR - 24 ? 'end' : 'middle');
+      out.push('<text x="' + X(u).toFixed(1) + '" y="' + (MT + ph + 18) + '" text-anchor="' + anchor + '">' + count(u) + '</text>');
+    }
+    out.push('<text x="' + (ML + pw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">Average AI credits per user a month</text>');
+
+    if (m.n > 0) {
+      var kink = Math.min(m.allow, xmax);
+
+      // Region where Copilot access is the cheaper option
+      var end = m.kind === 'cross' ? Math.min(m.beAvg, xmax)
+        : m.kind === 'equalAbove' ? kink
+        : m.kind === 'always' ? xmax : 0;
+      if (end > 0) {
+        var poly = [pt(0, accAt(0)), pt(end, accAt(end)), pt(end, nowAt(end))];
+        if (kink < end) poly.push(pt(kink, nowAt(kink)));
+        poly.push(pt(0, nowAt(0)));
+        out.push('<polygon class="wash" points="' + poly.join(' ') + '"/>');
+      }
+
+      out.push('<polyline class="line-plan" points="' + [pt(0, nowAt(0)), pt(kink, nowAt(kink)), pt(xmax, nowAt(xmax))].join(' ') + '"/>');
+      out.push('<polyline class="line-access" points="' + [pt(0, accAt(0)), pt(xmax, accAt(xmax))].join(' ') + '"/>');
+
+      // Where the pooled allowance runs out
+      // Sits below the line, where neither series runs once the allowance is gone.
+      if (m.allow < xmax && W - MR - X(m.allow) > 124 && Y(m.seatNow) + 22 < MT + ph) {
+        out.push('<line class="axis" x1="' + X(m.allow).toFixed(1) + '" x2="' + X(m.allow).toFixed(1) + '" y1="' + (Y(m.seatNow) + 3).toFixed(1) + '" y2="' + (Y(m.seatNow) + 10).toFixed(1) + '"/>');
+        notes.push('<text class="note" x="' + (X(m.allow) + 6).toFixed(1) + '" y="' + (Y(m.seatNow) + 20).toFixed(1) + '">Allowance used up</text>');
+      }
+
+      // Break-even
+      if (m.kind === 'cross' && m.beAvg <= xmax) {
+        var bx = X(m.beAvg), by = Y(nowAt(m.beAvg));
+        out.push('<circle class="be" cx="' + bx.toFixed(1) + '" cy="' + by.toFixed(1) + '" r="5"/>');
+        var left = bx - ML > 80;
+        notes.push('<text class="note" x="' + (left ? bx - 9 : bx + 9).toFixed(1) + '" y="' + (by - 10).toFixed(1) + '" text-anchor="' + (left ? 'end' : 'start') + '">Same cost</text>');
+      }
+
+      // Your usage
+      var ux = X(Math.min(m.avg, xmax));
+      var tx = Math.min(Math.max(ux, ML + 36), W - MR - 36);
+      out.push('<line class="marker" x1="' + ux.toFixed(1) + '" x2="' + ux.toFixed(1) + '" y1="' + (MT - 8) + '" y2="' + (MT + ph) + '"/>');
+      out.push('<text class="tag" x="' + tx.toFixed(1) + '" y="' + (MT - 14) + '" text-anchor="middle">Your usage</text>');
+      if (m.avg <= xmax) {
+        out.push('<circle class="dot-plan" cx="' + ux.toFixed(1) + '" cy="' + Y(m.now).toFixed(1) + '" r="5"/>');
+        out.push('<circle class="dot-access" cx="' + ux.toFixed(1) + '" cy="' + Y(m.acc).toFixed(1) + '" r="5"/>');
+      }
+    }
+
+    svg.innerHTML = out.concat(notes).join('');
+    $('chartDesc').textContent = m.n === 0 ? '' :
+      'Monthly cost for ' + count(m.n) + ' ' + plural(m.n, 'seat', 'seats') + ' as average usage changes. ' + m.planName +
+      ' stays flat until the pooled allowance of ' + count(m.allow) + ' credits per user is used up, then rises. Copilot access rises from the first credit. ' +
+      'At ' + count(m.avg) + ' credits per user, ' + m.planName + ' is ' + money(m.now) + ' and Copilot access is ' + money(m.acc) +
+      '. Drag across the chart to try a different level of usage.';
+  }
+
+  /* ---------- events ---------- */
+  form.addEventListener('input', function (e) {
+    readControls(e.target);
+    render(e.target);
+  });
+
+  document.querySelectorAll('.chips button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var allow = state.p === 'cb' ? state.ba : state.ea;
+      setAverage(allow * parseFloat(b.dataset.frac));
+      render(null);
+    });
+  });
+
+  $('reset').addEventListener('click', function () {
+    Object.assign(state, LIST);
+    render(null);
+  });
+
+  function setFromPointer(e) {
+    var r = els.chart.getBoundingClientRect();
+    var W = Math.max(280, Math.round(els.chart.clientWidth || 720));
+    var x = (e.clientX - r.left) / r.width * W;
+    var frac = Math.min(1, Math.max(0, (x - 50) / (W - 50 - 14)));
+    var step = chartXmax > 20000 ? 100 : 10;
+    setAverage(Math.round(frac * chartXmax / step) * step);
+    render(null);
+  }
+  els.chart.addEventListener('pointerdown', function (e) {
+    dragXmax = chartXmax;
+    try { els.chart.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ }
+    setFromPointer(e);
+  });
+  els.chart.addEventListener('pointermove', function (e) {
+    if (dragXmax !== null) setFromPointer(e);
+  });
+  ['pointerup', 'pointercancel'].forEach(function (t) {
+    els.chart.addEventListener(t, function () {
+      if (dragXmax === null) return;
+      dragXmax = null;
+      render(null);
+    });
+  });
+
+  function summaryText() {
+    var m = model(state);
+    var lines = [
+      'Copilot access comparison, per month in US dollars',
+      'Plan today: ' + m.planName + ', ' + count(m.n) + ' seats (' + count(m.g) + ' with a GitHub Enterprise Cloud licence, ' + count(m.st) + ' without)',
+      'Usage: ' + count(m.total) + ' AI credits a month (' + count(m.avg) + ' per user)',
+      m.planName + ' today: ' + money(m.now) + ' (' + money(m.seatNow) + ' seats + ' + money(m.meterNow) + ' usage over the allowance)',
+      'Copilot access: ' + money(m.acc) + ' (' + money(m.seatAcc) + ' Copilot Standalone + ' + money(m.meterAcc) + ' usage)',
+      Math.abs(m.diff) < EPS
+        ? 'Difference: none at this usage'
+        : 'Difference: Copilot access costs ' + money(Math.abs(m.diff)) + (m.diff < 0 ? ' less' : ' more') + ' a month (' + money(Math.abs(m.diff) * 12) + ' a year)'
+    ];
+    if (m.kind === 'cross') lines.push('Same cost at: ' + count(m.beAvg) + ' credits per user a month');
+    lines.push('Rates: ' + money(m.price) + ' per seat with ' + count(m.allow) + ' credits, ' + money(state.sf) + ' Copilot Standalone, ' + money(state.cv) + ' per credit');
+    lines.push('Estimate only. Confirm pricing for your account with your GitHub or Microsoft account team.');
+    return lines.join('\n');
+  }
+
+  function copy(text, done) {
+    var status = $('copyStatus');
+    var ok = function () { status.textContent = done; setTimeout(function () { status.textContent = ''; }, 2500); };
+    var fallback = function () {
+      var t = document.createElement('textarea');
+      t.value = text; t.setAttribute('readonly', '');
+      t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); ok(); }
+      catch (e) { status.textContent = 'Copying is blocked in this browser.'; }
+      document.body.removeChild(t);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback);
+    else fallback();
+  }
+  $('copySummary').addEventListener('click', function () { copy(summaryText(), 'Summary copied.'); });
+  $('copyLink').addEventListener('click', function () {
+    copy(location.href.split('#')[0] + '#' + hashString(), 'Link copied.');
+  });
+
+  if (window.ResizeObserver) {
+    var lastW = 0;
+    new ResizeObserver(function () {
+      var w = els.chart.clientWidth;
+      if (w !== lastW) { lastW = w; renderChart(model(state)); }
+    }).observe(els.chart);
+  }
+
+  // Exposed for testing in the console.
+  window.copilotAccessModel = function (overrides) { return model(Object.assign({}, state, overrides || {})); };
+
+  readHash();
+  render(null);
+})();
+</script>
+</body>
+</html>
